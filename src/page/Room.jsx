@@ -113,12 +113,14 @@ export default function Room() {
           {players.length}/{MAX_PLAYERS} người đã tham gia
         </p>
       </div>
-      <button
-        className="btn btn-warning text-gray-700 ml-auto"
-        onClick={() => leaveRoom()}
-      >
-        Rời phòng
-      </button>
+      <div className="w-full max-w-md flex">
+        <button
+          className="btn btn-warning text-gray-700 ml-auto"
+          onClick={() => leaveRoom()}
+        >
+          Rời phòng
+        </button>
+      </div>
       {/* Chọn chủ đề */}
       <SliderSelect isHost={isHost} />
 
