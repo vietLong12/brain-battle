@@ -41,21 +41,17 @@ const emoji = [
 ];
 const getEmoji = () => {
     const randomIndex1 = Math.floor(Math.random() * emoji.length);
-    const randomIndex2 = Math.floor(Math.random() * emoji.length);
-    const randomIndex3 = Math.floor(Math.random() * emoji.length);
-    return `${emoji[randomIndex1].emoji} ${emoji[randomIndex2].emoji} ${emoji[randomIndex3].emoji}`;
+    return `${emoji[randomIndex1].emoji}`;
 };
 const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
         setUser: (state, action) => {
-            console.log('state, action: ', state, action);
 
             // Cập nhật state
             state.name = action.payload.name + ' ' + getEmoji();
             state.avatar = action.payload.avatar;
-            state.id = crypto.randomUUID();
 
             // Lưu vào localStorage
             localStorage.setItem('user', JSON.stringify(state));
@@ -71,5 +67,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { setUser, setRoom,logoutUser } = userSlice.actions;
+export const { setUser, setRoom, logoutUser } = userSlice.actions;
 export default userSlice.reducer;

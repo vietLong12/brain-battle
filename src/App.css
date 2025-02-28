@@ -1,12 +1,51 @@
 @import "tailwindcss";
 /* @plugin "daisyui"; */
 
-
-
 @font-face {
   font-family: ballo2;
   src: url("assets/font/Baloo2.ttf");
 }
 html {
   font-family: ballo2;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+.btn-success {
+  box-shadow: 0 4px #00977d !important;
+}
+
+.btn-warning {
+  box-shadow: 0 4px #c59400 !important;
+}
+
+.btn-primary:disabled {
+  color: rgba(255, 255, 255, 0.658);
+}
+
+.btn-success:disabled {
+  background-color: #00a96e;
+  color: rgba(255, 255, 255, 0.658);
+}
+
+.btn-primary {
+  background-color: #8854c0;
+  box-shadow: 0 4px #613c8a;
+  border: none;
+}
+
+.bg-primary {
+  background-color: #6e3e9e;
+}
+
+.btn-primary:hover {
+  background-color: #a076cc;
+}
+
+input:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }

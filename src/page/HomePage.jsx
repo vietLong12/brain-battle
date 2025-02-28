@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { FaCameraRetro } from "react-icons/fa";
 
 const WelcomeScreen = ({ onStart }) => {
   const navigate = useNavigate();
@@ -46,56 +47,68 @@ const WelcomeScreen = ({ onStart }) => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen text-white">
-      <div className="bg-[#f8fafc] p-8 mx-4 rounded-2xl shadow-lg text-center  text-[#1e293b]">
-        <p className="font-bold text-2xl text-pink-500 text-center leading-relaxed">
-          💐 Chúc mừng 8/3! <br />
-          Chúc bạn luôn xinh đẹp, hạnh phúc và tràn đầy năng lượng 💖✨
+      <div className="bg-[#663399] text-orange p-8 mx-4 rounded-2xl shadow-lg text-center  text-white">
+        <p className="font-bold text-2xl text-pink-500 text-center leading-relaxed hidden">
+          Chúc mừng 8/3! <br />
+          Chúc bạn luôn xinh đẹp, hạnh phúc và tràn đầy năng lượng
         </p>
-
         <h1 className="text-2xl font-bold mb-4">
           🎉🎉🎉
           <br /> Chào mừng bạn đến với <br />
-          <span className="text-4xl">Brain Battle!!!</span>
+          <img
+            src="./src/assets/logo-brain-battle.png"
+            alt=""
+            className="w-11/12 mx-auto my-2 drop-shadow-2xl"
+          />
         </h1>
-
-        <p className="mb-4">Nhập tên & chọn ảnh đại diện để bắt đầu</p>
-
+        <p className="mb-4 text-lg">Nhập tên & chọn ảnh đại diện để bắt đầu</p>
         {/* Ô nhập tên */}
         <input
           type="text"
-          className="input input-bordered w-full mb-4 input-primary"
+          className="input input-bordered w-full mb-4 input-primary text-black focus:outline-none focus:ring-0"
           placeholder="Nhập tên của bạn..."
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-
-        {/* Upload ảnh đại diện */}
-        <label className="cursor-pointer flex justify-start items-center gap-2 px-4 py-2 btn rounded-full btn-info mb-4">
-          👀 Nhấn để chọn ảnh đại diện, đừng để trống nha!
-          <input
-            type="file"
-            accept="image/*"
-            className="file-input file-input-bordered w-full mb-4 hidden"
-            onChange={handleImageChange}
-          />
-        </label>
         {/* Hiển thị ảnh đã chọn */}
+        <h3 className="font-medium mt-2 mb-4">Ảnh đại diện của bạn:</h3>
         {preview !== "" ? (
-          <img
-            src={preview}
-            alt="Avatar Preview"
-            className="w-36 h-36 rounded-full mx-auto mb-4 border object-cover"
-          />
+          <>
+            <label className="cursor-pointer flex justify-center mx-auto items-center !w-36 !h-36 rounded-full mb-4 bg-primary">
+              <div>
+                <img
+                  src={preview}
+                  alt="Avatar Preview"
+                  className="!w-36 !h-36 rounded-full mx-auto border object-cover !bg-[#6e3e9e]"
+                />
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                className="file-input file-input-bordered w-full mb-4 hidden"
+                onChange={handleImageChange}
+              />
+            </label>
+          </>
         ) : (
-          ""
+          <label className="cursor-pointer flex justify-center mx-auto items-center !w-36 !h-36 rounded-full gap-2 px-4 py-2 btn btn-info mb-4 border-dashed !bg-[#8854c0] hover:opacity-80 shadow-fuchsia-700 shadow-xl">
+            <div>
+              <FaCameraRetro className="text-white text-4xl" />
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="file-input file-input-bordered w-full mb-4 hidden"
+              onChange={handleImageChange}
+            />
+          </label>
         )}
-
         {/* Nút bắt đầu */}
         <button
-          className="btn btn-primary w-fit border mt-5 uppercase font-bold text-2xl"
+          className="btn btn-primary w-fit mt-5 uppercase font-bold text-2xl text-white"
           onClick={handleStart}
         >
-          🚀 Bắt đầu ngay
+          🚀 Bắt đầu ngay 🚀
         </button>
       </div>
     </div>

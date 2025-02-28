@@ -3,6 +3,9 @@ import "../src/App.css";
 import WelcomeScreen from "./page/HomePage";
 import RoomSelection from "./page/RoomSelection";
 import { Toaster } from "react-hot-toast";
+import NotFound from "./page/NotFound";
+import Room from "./page/Room";
+import SliderSelect from "./components/SliderSelect";
 function App() {
   return (
     <>
@@ -13,7 +16,9 @@ function App() {
         <Routes>
           <Route path="/" element={<WelcomeScreen />} />
           <Route path="/join" element={<RoomSelection />} />
-          {/* <Route path="*" element={<NotFound />} /> */}
+          
+          <Route path="/room" element={<Room />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </>
