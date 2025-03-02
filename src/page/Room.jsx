@@ -1,6 +1,6 @@
 import { useState } from "react";
 import SliderSelect from "../components/SliderSelect";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   FaChessKing,
   FaCopy,
@@ -9,28 +9,25 @@ import {
   FaUserFriends,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import socket from "../socket";
 
 export default function Room() {
   const navigate = useNavigate();
-
-  const [players, setPlayers] = useState([
-    { id: 1, avatar: "N", name: "Nam", isHost: true },
-    { id: 2, avatar: "H", name: "Huy" },
-    { id: 3, avatar: "L", name: "Linh" },
-    { id: 3, avatar: "L", name: "Linh" },
-    { id: 3, avatar: "L", name: "Linh" },
-    { id: 3, avatar: "L", name: "Linh" },
-  ]);
-
+  const location = useLocation();
+  const roomData = location.state?.roomData || {}; // Lấy data từ navigate
+  const user = useSelector((state) => state.user);
+  const [players, setPlayers] = useState(roomData.users);
+  const [roomInfo, setRoomInfo] = useState(roomData.roomInfo);
   const topics = ["Âm nhạc", "Phim ảnh", "Thể thao", "Khoa học", "Lịch sử"];
   const [selectedTopic, setSelectedTopic] = useState(topics[0]);
-
+  const [isHost, setIsHost] = useState(roomInfo.owner === user.id);
   // Số người chơi tối đa
   const MAX_PLAYERS = 6;
 
-  const isHost = true;
-
   const leaveRoom = () => {
+    socket.emit("leaveRoom", { roomName: roomInfo.name, userId: user.id });
     navigate("/");
   };
 
@@ -44,6 +41,28 @@ export default function Room() {
     document.body.removeChild(input);
     toast.success("📋 Đã sao chép!");
   };
+
+  useEffect(() => {
+    const handleRoomDeleted = () => {
+      socket.emit("leaveRoom", { roomName: roomInfo.name, userId: user.id });
+      navigate("/");
+    };
+
+    socket.on("roomInfo", (data) => {
+      console.log("Có thành viên mới gia nhập");
+      const parsedData = JSON.parse(data);
+      console.log('parsedData: ', parsedData);
+      setIsHost(roomInfo.owner === user.id);
+      setRoomInfo(parsedData.roomInfo);
+      setPlayers(parsedData.users)
+    });
+
+    socket.on("roomDeleted", handleRoomDeleted);
+
+    return () => {
+      socket.off("roomDeleted", handleRoomDeleted);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
@@ -77,7 +96,7 @@ export default function Room() {
             <FaHouseUser className="mr-2" /> Tên phòng:
           </span>
           <span className="text-error flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
-            Việt Long's Room Việt Long's Room Việt Long's Room Việt Long's Room
+            {roomInfo.name}
           </span>
           <FaCopy
             className="ml-3 text-blue-500 cursor-pointer"
@@ -95,8 +114,10 @@ export default function Room() {
               className="py-2 flex justify-start items-center"
             >
               <div className="avatar placeholder mr-2">
-                <div className="bg-neutral text-neutral-content w-6 rounded-full">
-                  <span>{player.avatar}</span>
+                <div className="avatar">
+                  <div className="w-7 rounded-full">
+                    <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                  </div>
                 </div>
               </div>
               <span className="text-[18px] font-medium">{player.name}</span>

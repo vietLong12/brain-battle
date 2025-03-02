@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setUser } from "../store/userSlice";
+import { setUserAsync } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaCameraRetro } from "react-icons/fa";
+import { io } from "socket.io-client";
+import { setLoading } from "../store/appSlice";
 
+// const socket = io("http://localhost:3000");
 const WelcomeScreen = ({ onStart }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -16,6 +19,7 @@ const WelcomeScreen = ({ onStart }) => {
   const [preview, setPreview] = useState("");
 
   const handleImageChange = (e) => {
+    console.log("e.target.files: ", e.target.files);
     const file = e.target.files[0];
     if (file) {
       setAvatar(file);
@@ -23,7 +27,7 @@ const WelcomeScreen = ({ onStart }) => {
     }
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (name.trim() === "") {
       toast.error("Ơ kìa! Bạn định chơi ẩn danh à? Nhập tên vào nào! 🤔");
       return;
@@ -33,13 +37,15 @@ const WelcomeScreen = ({ onStart }) => {
       );
       return;
     }
-
-    dispatch(setUser({ name, avatar: preview }));
-    navigate("/join");
+    dispatch(setLoading(true));
+    const res = await dispatch(setUserAsync({ name, file: avatar }));
+    if (res.type === "user/setUser/fulfilled") {
+      navigate("/join");
+    }
+    dispatch(setLoading(false));
   };
 
   useEffect(() => {
-    console.log("user: ", user);
     if (user.name) {
       navigate("/join");
     }

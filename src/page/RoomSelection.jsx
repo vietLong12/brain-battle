@@ -4,6 +4,7 @@ import { logoutUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 
 import toast from "react-hot-toast";
+import socket from "../socket";
 
 let toastId = null; // Biến lưu ID của toast
 
@@ -55,12 +56,18 @@ export default function RoomSelection() {
 
   const onJoinRoom = () => {
     console.log(`Người dùng ${user.name} muốn tham gia phòng ${roomNameJoin}`);
-    navigate("/room");
+    socket.emit("joinRoom", {
+      userId: user.id,
+      roomName: roomNameJoin,
+    });
   };
 
   const onCreateRoom = () => {
     console.log(`Người dùng ${user.name} muốn tạo phòng ${roomNameCreate}`);
-    navigate("/room");
+    socket.emit("createRoom", {
+      userId: user.id,
+      name: roomNameCreate,
+    });
   };
 
   const logout = async () => {
@@ -79,14 +86,22 @@ export default function RoomSelection() {
   };
 
   useEffect(() => {
-    console.log("user: ", user);
+    socket.on("roomInfo", (data) => {
+      const parsedData = JSON.parse(data);
+      console.log("data: ", parsedData);
+      navigate("/room", { state: { roomData: parsedData } });
+    });
+
+    return () => {
+      socket.off("roomInfo");
+    };
   }, []);
   return (
     <div className="flex flex-col items-center justify-center min-h-screen to-pink-500 text-white p-6 ">
       <div className="bg-white  p-6 rounded-2xl shadow-xl w-full mx-4 max-w-96 bg-primary text-white">
         <div className="flex items-center gap-3 mb-4">
           <img
-            src={user?.avatar}
+            src={user.avatar || null}
             alt="Avatar"
             className="w-12 h-12 rounded-full border-2 border-purple-500 object-cover"
           />
