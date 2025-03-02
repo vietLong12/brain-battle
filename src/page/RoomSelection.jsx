@@ -4,6 +4,7 @@ import { logoutUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 
 import toast from "react-hot-toast";
+import socket from "../services/socket";
 
 let toastId = null; // Biến lưu ID của toast
 
@@ -47,20 +48,38 @@ const toastConfirm = (message) => {
 };
 
 export default function RoomSelection() {
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.userInfor);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [roomNameJoin, setRoomNameJoin] = useState("");
   const [roomNameCreate, setRoomNameCreate] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onJoinRoom = () => {
-    console.log(`Người dùng ${user.name} muốn tham gia phòng ${roomNameJoin}`);
-    navigate("/room");
+    setLoading(true);
+
+    if (roomNameJoin && user.id) {
+      socket.emit(
+        "joinRoom",
+        JSON.stringify({ roomName: roomNameJoin, userId: user.id })
+      );
+    } else {
+      toast.error("Tên phòng không hợp lệ");
+    }
+    setLoading(false);
   };
 
-  const onCreateRoom = () => {
-    console.log(`Người dùng ${user.name} muốn tạo phòng ${roomNameCreate}`);
-    navigate("/room");
+  const onCreateRoom = async () => {
+    setLoading(true);
+    if (roomNameCreate && user.id) {
+      socket.emit(
+        "createRoom",
+        JSON.stringify({ userId: user.id, name: roomNameCreate })
+      );
+    } else {
+      toast.error("Tên phòng không hợp lệ");
+    }
+    setLoading(false);
   };
 
   const logout = async () => {
@@ -68,6 +87,7 @@ export default function RoomSelection() {
       "Bạn có chắc muốn đăng xuất không? Một cú click thôi là tôi quên bạn luôn đấy! 😢"
     );
     if (confirmed) {
+      socket.emit("logout", JSON.stringify({ userId: user.id }));
       dispatch(logoutUser());
       navigate("/");
       toast.success(
@@ -79,8 +99,34 @@ export default function RoomSelection() {
   };
 
   useEffect(() => {
-    console.log("user: ", user);
+    if (!user.name) {
+      navigate("/");
+      return;
+    }
+    socket.on("roomInfo", (data) => {
+      const room = JSON.parse(data);
+      if (room) {
+        navigate(`/room/${room.roomInfo.name}`);
+      }
+    });
   }, []);
+
+  useEffect(() => {
+    const handleError = (data) => {
+      const msg = JSON.parse(data);
+
+      // Xóa toast cũ trước khi hiển thị toast mới
+      toast.dismiss();
+      toast.error(msg.message);
+    };
+
+    socket.on("error", handleError);
+
+    return () => {
+      socket.off("error", handleError); // Cleanup tránh đăng ký nhiều lần
+    };
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen to-pink-500 text-white p-6 ">
       <div className="bg-white  p-6 rounded-2xl shadow-xl w-full mx-4 max-w-96 bg-primary text-white">
@@ -123,9 +169,13 @@ export default function RoomSelection() {
         <button
           onClick={() => onJoinRoom()}
           className="btn btn-primary w-full text-white"
-          disabled={!roomNameJoin.trim()}
+          disabled={!roomNameJoin.trim() || loading}
         >
-          Vào phòng 🚀
+          {loading ? (
+            <span className="loading loading-spinner"></span>
+          ) : (
+            "  Vào phòng 🚀"
+          )}
         </button>
 
         <div className="divider">Hoặc</div>
@@ -141,9 +191,13 @@ export default function RoomSelection() {
         <button
           onClick={() => onCreateRoom()}
           className="btn btn-success w-full text-white"
-          disabled={!roomNameCreate.trim()}
+          disabled={!roomNameCreate.trim() || loading}
         >
-          Tạo phòng 🏠
+          {loading ? (
+            <span className="loading loading-spinner"></span>
+          ) : (
+            "Tạo phòng 🏠"
+          )}
         </button>
       </div>
     </div>

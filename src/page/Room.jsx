@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SliderSelect from "../components/SliderSelect";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,34 +9,34 @@ import {
   FaUserFriends,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import socket from "../services/socket";
 
 export default function Room() {
   const navigate = useNavigate();
+  const { roomName } = useParams();
+  const user = useSelector((state) => state.user.userInfor);
 
-  const [players, setPlayers] = useState([
-    { id: 1, avatar: "N", name: "Nam", isHost: true },
-    { id: 2, avatar: "H", name: "Huy" },
-    { id: 3, avatar: "L", name: "Linh" },
-    { id: 3, avatar: "L", name: "Linh" },
-    { id: 3, avatar: "L", name: "Linh" },
-    { id: 3, avatar: "L", name: "Linh" },
-  ]);
+  const [players, setPlayers] = useState([]);
+  const [infor, setInfor] = useState({});
 
-  const topics = ["Âm nhạc", "Phim ảnh", "Thể thao", "Khoa học", "Lịch sử"];
-  const [selectedTopic, setSelectedTopic] = useState(topics[0]);
+  const [selectedTopicIds, setSelectedTopicIds] = useState(new Set());
 
   // Số người chơi tối đa
-  const MAX_PLAYERS = 6;
-
-  const isHost = true;
+  const MAX_PLAYERS = 3;
 
   const leaveRoom = () => {
+    socket.emit(
+      "leaveRoom",
+      JSON.stringify({ roomName: roomName, userId: user.id })
+    );
     navigate("/");
   };
 
-  const copyRoom = () => {
+  const copyRoom = (name) => {
     const input = document.createElement("input");
-    input.value = "hello brain battle";
+    input.value = name;
     document.body.appendChild(input);
     input.select();
     input.setSelectionRange(0, 99999); // Đảm bảo chọn toàn bộ nội dung
@@ -45,9 +45,67 @@ export default function Room() {
     toast.success("📋 Đã sao chép!");
   };
 
+  const startGame = () => {
+    socket.emit(
+      "startGame",
+      JSON.stringify({
+        roomName,
+        userId: user.id,
+        topicsIds: Array.from(selectedTopicIds),
+      })
+    );
+  };
+
+  // Lấy thông tin của phòng chơi khi ngừo chơi reload lại
+  useEffect(() => {
+    socket.on("roomInfo", (data) => {
+      const room = JSON.parse(data);
+      setPlayers(room.users);
+      setInfor(room.roomInfo);
+    });
+    socket.on("roomDeleted", () => {
+      navigate("/join");
+      toast.error("Phòng đã bị xóa bởi chủ phòng");
+    });
+    socket.on("gameStarted", (data) => {
+      const room = JSON.parse(data);
+      console.log(room);
+    });
+  }, []);
+
+  // Lấy thông tin phòng chơi khi người chơi vào phòng
+  useEffect(() => {
+    if (!user.id || !roomName) {
+      navigate("/");
+      return;
+    }
+
+    socket.emit(
+      "getRoomInfo",
+      JSON.stringify({ roomName: roomName, userId: user.id })
+    );
+  }, []);
+
+  // lăng nghe sự kiện lỗi từ server
+  useEffect(() => {
+    const handleError = (data) => {
+      const msg = JSON.parse(data);
+
+      // Xóa toast cũ trước khi hiển thị toast mới
+      toast.dismiss();
+      toast.error(msg.message);
+    };
+
+    socket.on("error", handleError);
+
+    return () => {
+      socket.off("error", handleError); // Cleanup tránh đăng ký nhiều lần
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
-      {isHost ? (
+      {user.id === infor?.owner ? (
         <h1 className="text-2xl font-bold mb-4 text-white text-center">
           Bạn là trùm ở đây! Đợi đủ người rồi nhấn "Bắt đầu chơi" để thị uy
           quyền lực!
@@ -63,25 +121,26 @@ export default function Room() {
           <span className="loading loading-dots loading-lg mb-3 text-white"></span>
         </>
       )}
-
-      {isHost && players.length === 6 && (
-        <button className="px-6 py-3 mb-5 bg-green-500 btn btn-primary text-white text-2xl uppercase rounded-full shadow-md hover:bg-green-600 transition flex items-center font-bold">
+      {user.id === infor?.owner && players.length === MAX_PLAYERS && (
+        <button
+          className="px-6 py-3 mb-5 bg-green-500 btn btn-primary text-white text-2xl uppercase rounded-full shadow-md hover:bg-green-600 transition flex items-center font-bold"
+          onClick={startGame}
+        >
           🎯 Bắt đầu chơi! 🎯
         </button>
       )}
-
-      {/* Danh sách người chơi */}
+      {/* Danh sach nguoi choi */}
       <div className="w-full max-w-md bg-primary text-white p-4 rounded-lg shadow-md mb-4">
         <h2 className="text-lg font-semibold mb-2 flex items-center">
           <span className="w-[130px] flex-shrink-0 flex items-center">
             <FaHouseUser className="mr-2" /> Tên phòng:
           </span>
           <span className="text-error flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
-            Việt Long's Room Việt Long's Room Việt Long's Room Việt Long's Room
+            {infor?.name}
           </span>
           <FaCopy
             className="ml-3 text-blue-500 cursor-pointer"
-            onClick={() => copyRoom()}
+            onClick={() => copyRoom(infor?.name)}
           />
         </h2>
 
@@ -96,11 +155,11 @@ export default function Room() {
             >
               <div className="avatar placeholder mr-2">
                 <div className="bg-neutral text-neutral-content w-6 rounded-full">
-                  <span>{player.avatar}</span>
+                  <img src={player.avatar}></img>
                 </div>
               </div>
               <span className="text-[18px] font-medium">{player.name}</span>
-              {player.isHost && (
+              {player.id === infor?.owner && (
                 <span className="text-sm  ml-auto">
                   <FaChessKing className="text-2xl text-yellow-300" />
                 </span>
@@ -113,17 +172,20 @@ export default function Room() {
           {players.length}/{MAX_PLAYERS} người đã tham gia
         </p>
       </div>
-      <div className="w-full max-w-md flex">
+      <div className="w-full max-w-md flex items-center justify-center">
         <button
-          className="btn btn-warning text-gray-700 ml-auto"
+          className="btn btn-warning text-gray-700"
           onClick={() => leaveRoom()}
         >
           Rời phòng
         </button>
       </div>
       {/* Chọn chủ đề */}
-      <SliderSelect isHost={isHost} />
-
+      <SliderSelect
+        isHost={user.id === infor?.owner}
+        selectedTopicIds={selectedTopicIds}
+        setSelectedTopicIds={setSelectedTopicIds}
+      />
       {/* Nút bắt đầu (chỉ hiện khi đủ người & chủ phòng) */}
     </div>
   );

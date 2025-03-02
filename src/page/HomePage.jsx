@@ -4,16 +4,19 @@ import { setUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaCameraRetro } from "react-icons/fa";
+import UserServices from "../services/userServices";
+import handelError from "../utils/handelError";
 
 const WelcomeScreen = ({ onStart }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.userInfor);
 
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -23,7 +26,7 @@ const WelcomeScreen = ({ onStart }) => {
     }
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (name.trim() === "") {
       toast.error("Ơ kìa! Bạn định chơi ẩn danh à? Nhập tên vào nào! 🤔");
       return;
@@ -33,9 +36,27 @@ const WelcomeScreen = ({ onStart }) => {
       );
       return;
     }
+    setLoading(true);
 
-    dispatch(setUser({ name, avatar: preview }));
-    navigate("/join");
+    try {
+      const data = {
+        name: name,
+        avatar: avatar,
+      };
+      const res = await UserServices.registerAccount(data);
+      dispatch(
+        setUser({
+          name: res.data.name,
+          avatar: res.data.avatar,
+          id: res.data._id,
+        })
+      );
+      navigate("/join");
+    } catch (error) {
+      toast.error(handelError(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -43,7 +64,7 @@ const WelcomeScreen = ({ onStart }) => {
     if (user.name) {
       navigate("/join");
     }
-  });
+  }, [user.name]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen text-white">
@@ -105,10 +126,15 @@ const WelcomeScreen = ({ onStart }) => {
         )}
         {/* Nút bắt đầu */}
         <button
-          className="btn btn-primary w-fit mt-5 uppercase font-bold text-2xl text-white"
+          disabled={loading}
+          className="btn btn-primary min-w-72 mt-5 uppercase font-bold text-2xl text-white"
           onClick={handleStart}
         >
-          🚀 Bắt đầu ngay 🚀
+          {loading ? (
+            <span className="loading loading-spinner"></span>
+          ) : (
+            " 🚀 Bắt đầu ngay 🚀"
+          )}
         </button>
       </div>
     </div>
