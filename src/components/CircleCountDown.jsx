@@ -1,4 +1,4 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import useSound from "use-sound";
 import soundCountDown from "../assets/sound/countdown-sound.mp3";

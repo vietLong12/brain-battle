@@ -1,31 +1,20 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { setUserAsync } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaCameraRetro } from "react-icons/fa";
-<<<<<<< HEAD
-import UserServices from "../services/userServices";
-import handelError from "../utils/handelError";
-=======
-import { io } from "socket.io-client";
 import { setLoading } from "../store/appSlice";
->>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
 
-// const socket = io("http://localhost:3000");
 const WelcomeScreen = ({ onStart }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const user = useSelector((state) => state.user.userInfor);
-
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {
-    console.log("e.target.files: ", e.target.files);
     const file = e.target.files[0];
     if (file) {
       setAvatar(file);
@@ -43,43 +32,13 @@ const WelcomeScreen = ({ onStart }) => {
       );
       return;
     }
-<<<<<<< HEAD
-    setLoading(true);
-
-    try {
-      const data = {
-        name: name,
-        avatar: avatar,
-      };
-      const res = await UserServices.registerAccount(data);
-      dispatch(
-        setUser({
-          name: res.data.name,
-          avatar: res.data.avatar,
-          id: res.data._id,
-        })
-      );
-      navigate("/join");
-    } catch (error) {
-      toast.error(handelError(error));
-    } finally {
-      setLoading(false);
-    }
-=======
     dispatch(setLoading(true));
     const res = await dispatch(setUserAsync({ name, file: avatar }));
     if (res.type === "user/setUser/fulfilled") {
       navigate("/join");
     }
     dispatch(setLoading(false));
->>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
   };
-
-  useEffect(() => {
-    if (user.name) {
-      navigate("/join");
-    }
-  }, [user.name]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen text-white">
@@ -141,15 +100,10 @@ const WelcomeScreen = ({ onStart }) => {
         )}
         {/* Nút bắt đầu */}
         <button
-          disabled={loading}
           className="btn btn-primary min-w-72 mt-5 uppercase font-bold text-2xl text-white"
           onClick={handleStart}
         >
-          {loading ? (
-            <span className="loading loading-spinner"></span>
-          ) : (
-            " 🚀 Bắt đầu ngay 🚀"
-          )}
+          🚀 Bắt đầu ngay 🚀
         </button>
       </div>
     </div>

@@ -3,7 +3,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import toast from "react-hot-toast";
-import TopicServices from "../services/topicServices";
+import { getAllTopics } from "../api/topicApi";
 
 export default function SliderSelect({
   isHost,
@@ -15,7 +15,9 @@ export default function SliderSelect({
   useEffect(() => {
     const fetchTopic = async () => {
       try {
-        const response = await TopicServices.getAllTopics();
+        const response = await getAllTopics();
+        console.log(response);
+
         setTopics(response);
       } catch (error) {
         console.error("Lỗi khi tải chủ đề:", error);
@@ -56,24 +58,28 @@ export default function SliderSelect({
             Chọn chủ đề:
           </h2>
 
-          <Slider {...settings} className="mb-6 w-96">
-            {topics.map((topic) => (
-              <div key={topic._id} className="px-2">
-                <div
-                  className={`relative p-4 rounded-lg shadow-md text-center h-[140px] flex justify-center flex-col items-center bg-cover bg-center overflow-hidden cursor-pointer ${
-                    selectedTopicIds.has(topic._id)
-                      ? "border-4 border-yellow-400 opacity-100"
-                      : "opacity-70"
-                  }`}
-                  style={{ backgroundImage: `url(${topic.bg})` }}
-                  onClick={() => toggleTopic(topic)}
-                >
-                  <div className="absolute inset-0 bg-black/50"></div>
-                  <p className="relative text-2xl text-white">{topic.name}</p>
+          {topics ? (
+            <Slider {...settings} className="mb-6 w-96">
+              {topics.map((topic) => (
+                <div key={topic._id} className="px-2">
+                  <div
+                    className={`relative p-4 rounded-lg shadow-md text-center h-[140px] flex justify-center flex-col items-center bg-cover bg-center overflow-hidden cursor-pointer ${
+                      selectedTopicIds.has(topic._id)
+                        ? "border-4 border-yellow-400 opacity-100"
+                        : "opacity-70"
+                    }`}
+                    style={{ backgroundImage: `url(${topic.bg})` }}
+                    onClick={() => toggleTopic(topic)}
+                  >
+                    <div className="absolute inset-0 bg-black/50"></div>
+                    <p className="relative text-2xl text-white">{topic.name}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </Slider>
+              ))}
+            </Slider>
+          ) : (
+            <p className="text-white">Không có chủ đề nào để hiển thị.</p>
+          )}
         </>
       )}
     </div>
