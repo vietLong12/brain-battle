@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setUser } from "../store/userSlice";
+import { setUserAsync } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaCameraRetro } from "react-icons/fa";
+<<<<<<< HEAD
 import UserServices from "../services/userServices";
 import handelError from "../utils/handelError";
+=======
+import { io } from "socket.io-client";
+import { setLoading } from "../store/appSlice";
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
 
+// const socket = io("http://localhost:3000");
 const WelcomeScreen = ({ onStart }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -19,6 +25,7 @@ const WelcomeScreen = ({ onStart }) => {
   const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {
+    console.log("e.target.files: ", e.target.files);
     const file = e.target.files[0];
     if (file) {
       setAvatar(file);
@@ -36,6 +43,7 @@ const WelcomeScreen = ({ onStart }) => {
       );
       return;
     }
+<<<<<<< HEAD
     setLoading(true);
 
     try {
@@ -57,10 +65,17 @@ const WelcomeScreen = ({ onStart }) => {
     } finally {
       setLoading(false);
     }
+=======
+    dispatch(setLoading(true));
+    const res = await dispatch(setUserAsync({ name, file: avatar }));
+    if (res.type === "user/setUser/fulfilled") {
+      navigate("/join");
+    }
+    dispatch(setLoading(false));
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
   };
 
   useEffect(() => {
-    console.log("user: ", user);
     if (user.name) {
       navigate("/join");
     }

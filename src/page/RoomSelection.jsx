@@ -4,7 +4,11 @@ import { logoutUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 
 import toast from "react-hot-toast";
+<<<<<<< HEAD
 import socket from "../services/socket";
+=======
+import socket from "../socket";
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
 
 let toastId = null; // Biến lưu ID của toast
 
@@ -56,6 +60,7 @@ export default function RoomSelection() {
   const [loading, setLoading] = useState(false);
 
   const onJoinRoom = () => {
+<<<<<<< HEAD
     setLoading(true);
 
     if (roomNameJoin && user.id) {
@@ -80,6 +85,21 @@ export default function RoomSelection() {
       toast.error("Tên phòng không hợp lệ");
     }
     setLoading(false);
+=======
+    console.log(`Người dùng ${user.name} muốn tham gia phòng ${roomNameJoin}`);
+    socket.emit("joinRoom", {
+      userId: user.id,
+      roomName: roomNameJoin,
+    });
+  };
+
+  const onCreateRoom = () => {
+    console.log(`Người dùng ${user.name} muốn tạo phòng ${roomNameCreate}`);
+    socket.emit("createRoom", {
+      userId: user.id,
+      name: roomNameCreate,
+    });
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
   };
 
   const logout = async () => {
@@ -99,6 +119,7 @@ export default function RoomSelection() {
   };
 
   useEffect(() => {
+<<<<<<< HEAD
     if (!user.name) {
       navigate("/");
       return;
@@ -109,6 +130,17 @@ export default function RoomSelection() {
         navigate(`/room/${room.roomInfo.name}`);
       }
     });
+=======
+    socket.on("roomInfo", (data) => {
+      const parsedData = JSON.parse(data);
+      console.log("data: ", parsedData);
+      navigate("/room", { state: { roomData: parsedData } });
+    });
+
+    return () => {
+      socket.off("roomInfo");
+    };
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
   }, []);
 
   useEffect(() => {
@@ -132,7 +164,7 @@ export default function RoomSelection() {
       <div className="bg-white  p-6 rounded-2xl shadow-xl w-full mx-4 max-w-96 bg-primary text-white">
         <div className="flex items-center gap-3 mb-4">
           <img
-            src={user?.avatar}
+            src={user.avatar || null}
             alt="Avatar"
             className="w-12 h-12 rounded-full border-2 border-purple-500 object-cover"
           />

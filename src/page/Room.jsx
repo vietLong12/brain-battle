@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import SliderSelect from "../components/SliderSelect";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   FaChessKing,
   FaCopy,
@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+<<<<<<< HEAD
 import { useParams } from "react-router-dom";
 import socket from "../services/socket";
 
@@ -31,6 +32,26 @@ export default function Room() {
       "leaveRoom",
       JSON.stringify({ roomName: roomName, userId: user.id })
     );
+=======
+import { useEffect } from "react";
+import socket from "../socket";
+
+export default function Room() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const roomData = location.state?.roomData || {}; // Lấy data từ navigate
+  const user = useSelector((state) => state.user);
+  const [players, setPlayers] = useState(roomData.users);
+  const [roomInfo, setRoomInfo] = useState(roomData.roomInfo);
+  const topics = ["Âm nhạc", "Phim ảnh", "Thể thao", "Khoa học", "Lịch sử"];
+  const [selectedTopic, setSelectedTopic] = useState(topics[0]);
+  const [isHost, setIsHost] = useState(roomInfo.owner === user.id);
+  // Số người chơi tối đa
+  const MAX_PLAYERS = 6;
+
+  const leaveRoom = () => {
+    socket.emit("leaveRoom", { roomName: roomInfo.name, userId: user.id });
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
     navigate("/");
   };
 
@@ -45,6 +66,7 @@ export default function Room() {
     toast.success("📋 Đã sao chép!");
   };
 
+<<<<<<< HEAD
   const startGame = () => {
     socket.emit(
       "startGame",
@@ -100,6 +122,27 @@ export default function Room() {
 
     return () => {
       socket.off("error", handleError); // Cleanup tránh đăng ký nhiều lần
+=======
+  useEffect(() => {
+    const handleRoomDeleted = () => {
+      socket.emit("leaveRoom", { roomName: roomInfo.name, userId: user.id });
+      navigate("/");
+    };
+
+    socket.on("roomInfo", (data) => {
+      console.log("Có thành viên mới gia nhập");
+      const parsedData = JSON.parse(data);
+      console.log('parsedData: ', parsedData);
+      setIsHost(roomInfo.owner === user.id);
+      setRoomInfo(parsedData.roomInfo);
+      setPlayers(parsedData.users)
+    });
+
+    socket.on("roomDeleted", handleRoomDeleted);
+
+    return () => {
+      socket.off("roomDeleted", handleRoomDeleted);
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
     };
   }, []);
 
@@ -136,7 +179,11 @@ export default function Room() {
             <FaHouseUser className="mr-2" /> Tên phòng:
           </span>
           <span className="text-error flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+<<<<<<< HEAD
             {infor?.name}
+=======
+            {roomInfo.name}
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
           </span>
           <FaCopy
             className="ml-3 text-blue-500 cursor-pointer"
@@ -154,8 +201,15 @@ export default function Room() {
               className="py-2 flex justify-start items-center"
             >
               <div className="avatar placeholder mr-2">
+<<<<<<< HEAD
                 <div className="bg-neutral text-neutral-content w-6 rounded-full">
                   <img src={player.avatar}></img>
+=======
+                <div className="avatar">
+                  <div className="w-7 rounded-full">
+                    <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                  </div>
+>>>>>>> 7b12379b0a1b2d4d6eb344ef173478eb9d648cc2
                 </div>
               </div>
               <span className="text-[18px] font-medium">{player.name}</span>
