@@ -1,3 +1,5 @@
+import "./daisyui.css";
+import "./daisyui.js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "../src/App.css";
 import WelcomeScreen from "./page/HomePage";
@@ -10,7 +12,11 @@ import FullScreenLoading from "./components/Loading";
 import { useEffect } from "react";
 import socket from "./socket";
 import toast from "react-hot-toast";
+import useUnlockAudio from "./hook/useUnlockSound.js";
+
 function App() {
+  const play = useUnlockAudio();
+
   useEffect(() => {
     socket.connect();
 
@@ -37,7 +43,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<WelcomeScreen />} />
-          <Route path="/game" element={<MainPage />} />
+          <Route path="/game" element={<MainPage play={play} />} />
           <Route path="/join" element={<RoomSelection />} />
           <Route path="/room" element={<Room />} />
           <Route path="*" element={<NotFound />} />

@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaCameraRetro } from "react-icons/fa";
 import { setLoading } from "../store/appSlice";
-
+import logo from "../assets/logo-brain-battle.png";
+// const socket = io("http://localhost:3000");
 const WelcomeScreen = ({ onStart }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -51,7 +52,7 @@ const WelcomeScreen = ({ onStart }) => {
           🎉🎉🎉
           <br /> Chào mừng bạn đến với <br />
           <img
-            src="./src/assets/logo-brain-battle.png"
+            src={logo}
             alt=""
             className="w-11/12 mx-auto my-2 drop-shadow-2xl"
           />

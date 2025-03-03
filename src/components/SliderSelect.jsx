@@ -16,7 +16,6 @@ export default function SliderSelect({
     const fetchTopic = async () => {
       try {
         const response = await getAllTopics();
-        console.log(response);
 
         setTopics(response);
       } catch (error) {
@@ -27,6 +26,7 @@ export default function SliderSelect({
   }, []);
 
   const toggleTopic = (topic) => {
+    console.log('topic: ', topic);
     setSelectedTopicIds((prevSelected) => {
       const newSelected = new Set(prevSelected);
       if (newSelected.has(topic._id)) {
@@ -72,7 +72,7 @@ export default function SliderSelect({
                     onClick={() => toggleTopic(topic)}
                   >
                     <div className="absolute inset-0 bg-black/50"></div>
-                    <p className="relative text-2xl text-white">{topic.name}</p>
+                    <p className="relative text-xl text-white">{topic.name}</p>
                   </div>
                 </div>
               ))}

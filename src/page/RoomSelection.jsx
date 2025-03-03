@@ -113,7 +113,7 @@ export default function RoomSelection() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen to-pink-500 text-white p-6 ">
-      <div className="bg-white  p-6 rounded-2xl shadow-xl w-full mx-4 max-w-96 bg-primary text-white">
+      <div className="p-6 rounded-2xl shadow-xl w-full mx-4 max-w-96 bg-primary text-white">
         <div className="flex items-center gap-3 mb-4">
           <img
             src={user?.avatar || null}

@@ -29,9 +29,18 @@ export default function Room() {
     navigate("/join");
   };
 
-  const copyRoom = (name) => {
+  const startGame = () => {
+    const data = {
+      roomName: roomInfo.name,
+      userId: user.id,
+      topicsIds: [...selectedTopicIds],
+    };
+    socket.emit("startGame", JSON.stringify(data));
+  };
+
+  const copyRoom = () => {
     const input = document.createElement("input");
-    input.value = name;
+    input.value = roomInfo.name;
     document.body.appendChild(input);
     input.select();
     input.setSelectionRange(0, 99999); // Đảm bảo chọn toàn bộ nội dung
@@ -53,9 +62,19 @@ export default function Room() {
       setPlayers(parsedData.users);
     });
 
+    socket.on("gameStarted", (data) => {
+      // console.log("data start: ", data);
+    });
+
+    socket.on("newTurn", (data) => {
+      console.log("data: ", data);
+      navigate("/game", data);
+    });
+
     socket.on("roomDeleted", handleRoomDeleted);
 
     return () => {
+      socket.off("newTurn");
       socket.off("roomDeleted", handleRoomDeleted);
     };
   }, []);
@@ -80,7 +99,7 @@ export default function Room() {
       )}
       {user.id === roomInfo?.owner && players.length === MAX_PLAYERS && (
         <button
-          className="px-6 py-3 mb-5 bg-green-500 btn btn-primary text-white text-2xl uppercase rounded-full shadow-md hover:bg-green-600 transition flex items-center font-bold"
+          className="px-6 mb-5 bg-green-500 btn btn-primary text-white text-2xl uppercase rounded-full shadow-md hover:bg-green-600 transition flex !items-center font-bold"
           onClick={startGame}
         >
           🎯 Bắt đầu chơi! 🎯

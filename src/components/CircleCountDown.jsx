@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
-import useSound from "use-sound";
-import soundCountDown from "../assets/sound/countdown-sound.mp3";
 
-const CircleCountDown = ({ duration = 5, onTimeout, classNameCustom }) => {
+const CircleCountDown = ({ duration = 5, onTimeout, classNameCustom, start, renderTime }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [key, setKey] = useState(0);
-  const [play] = useSound(soundCountDown, { volume: 1 });
-  const start = () => {
+
+  start.current = () => {
     setKey((prev) => prev + 1);
     setIsPlaying(true);
-    play();
   };
 
   return (
@@ -30,11 +27,9 @@ const CircleCountDown = ({ duration = 5, onTimeout, classNameCustom }) => {
           onTimeout?.();
         }}
       >
-        {({ remainingTime }) => (
-          <div className="text-lg font-bold" onClick={() => start()}>
-            {remainingTime}
-          </div>
-        )}
+        {({ remainingTime }) => 
+          renderTime ? renderTime(remainingTime) : <div className="text-lg font-bold">{remainingTime}</div>
+        }
       </CountdownCircleTimer>
     </div>
   );
