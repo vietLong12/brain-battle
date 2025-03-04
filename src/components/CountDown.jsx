@@ -10,7 +10,7 @@ const Countdown = ({ onComplete }) => {
     } else {
       onComplete && onComplete(); // Gọi callback khi kết thúc
     }
-  }, [count, onComplete]);
+  }, [count]);
 
   return (
     count > 0 && (

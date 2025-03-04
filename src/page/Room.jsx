@@ -13,6 +13,9 @@ import { useSelector } from "react-redux";
 import socket from "../socket";
 
 export default function Room() {
+  // Số người chơi tối đa
+  const MAX_PLAYERS = 2;
+
   const navigate = useNavigate();
   const location = useLocation();
   const roomData = location.state?.roomData || {}; // Lấy data từ navigate
@@ -21,22 +24,6 @@ export default function Room() {
   const [players, setPlayers] = useState(roomData.users);
   const [roomInfo, setRoomInfo] = useState(roomData.roomInfo);
   const [selectedTopicIds, setSelectedTopicIds] = useState(new Set());
-  // Số người chơi tối đa
-  const MAX_PLAYERS = 3;
-
-  const leaveRoom = () => {
-    socket.emit("leaveRoom", { roomName: roomInfo.name, userId: user.id });
-    navigate("/join");
-  };
-
-  const startGame = () => {
-    const data = {
-      roomName: roomInfo.name,
-      userId: user.id,
-      topicsIds: [...selectedTopicIds],
-    };
-    socket.emit("startGame", JSON.stringify(data));
-  };
 
   const copyRoom = () => {
     const input = document.createElement("input");
@@ -49,34 +36,40 @@ export default function Room() {
     toast.success("📋 Đã sao chép!");
   };
 
-  useEffect(() => {
-    const handleRoomDeleted = () => {
-      socket.emit("leaveRoom", { roomName: roomInfo.name, userId: user.id });
-      navigate("/join");
-    };
+  const leaveRoom = () => {
+    socket.emit("leaveRoom", { roomName: roomInfo.name, userId: user.id });
+    navigate("/join");
+  };
 
+  const startGame = () => {
+    const data = {
+      roomName: roomInfo.name,
+      userId: user.id,
+      topicsIds: [...selectedTopicIds],
+    };
+    socket.emit("startGame", data);
+  };
+
+  useEffect(() => {
     socket.on("roomInfo", (data) => {
-      console.log("Có thành viên mới gia nhập");
       const parsedData = JSON.parse(data);
       setRoomInfo(parsedData.roomInfo);
       setPlayers(parsedData.users);
     });
 
-    socket.on("gameStarted", (data) => {
-      // console.log("data start: ", data);
+    socket.on("gameStarted", () => {
+      navigate("/game", { state: { room: roomInfo } });
     });
 
-    socket.on("newTurn", (data) => {
-      console.log("data: ", data);
-      navigate("/game", data);
+    socket.on("roomDeleted", () => {
+      navigate("/join");
+      toast.error("Phòng đã bị xóa bởi chủ phòng");
     });
+  }, []);
 
-    socket.on("roomDeleted", handleRoomDeleted);
-
-    return () => {
-      socket.off("newTurn");
-      socket.off("roomDeleted", handleRoomDeleted);
-    };
+  //  Get data room when user refresh page
+  useEffect(() => {
+    socket.emit("getRoomInfo", { roomName: roomInfo.name, userId: user.id });
   }, []);
 
   return (

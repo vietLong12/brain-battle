@@ -25,8 +25,7 @@ function App() {
     });
 
     socket.on("error", (msg) => {
-      console.log("msg: ", msg);
-      toast.error(JSON.parse(msg).message);
+      toast.error(msg.message);
     });
     return () => {
       socket.off("error");

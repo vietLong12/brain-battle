@@ -26,7 +26,6 @@ export default function SliderSelect({
   }, []);
 
   const toggleTopic = (topic) => {
-    console.log('topic: ', topic);
     setSelectedTopicIds((prevSelected) => {
       const newSelected = new Set(prevSelected);
       if (newSelected.has(topic._id)) {

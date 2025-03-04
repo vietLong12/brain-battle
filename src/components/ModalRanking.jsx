@@ -34,8 +34,6 @@ const ModalRanking = () => {
   const [rankingPlayers, setRankingPlayers] = useState([]);
 
   useEffect(() => {
-    console.log("leaderboardData: ", leaderboardData);
-
     const dataSort = [...leaderboardData].sort((a, b) => b.score - a.score);
 
     if (dataSort.length > 1) {

@@ -96,19 +96,11 @@ export default function RoomSelection() {
   }, []);
 
   useEffect(() => {
-    const handleError = (data) => {
-      const msg = JSON.parse(data);
-
-      // Xóa toast cũ trước khi hiển thị toast mới
-      toast.dismiss();
-      toast.error(msg.message);
-    };
-
-    socket.on("error", handleError);
-
-    return () => {
-      socket.off("error", handleError); // Cleanup tránh đăng ký nhiều lần
-    };
+    // Nếu chưa đăng nhập thì chuyển về trang chủ
+    if (!user?.id) {
+      navigate("/");
+      return;
+    }
   }, []);
 
   return (

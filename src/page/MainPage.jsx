@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { CgLogOut } from "react-icons/cg";
 import { PiRankingFill } from "react-icons/pi";
 import CircleCountDown from "../components/CircleCountDown";
@@ -8,42 +8,32 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import socket from "../socket";
 import Countdown from "../components/CountDown";
-import { useRef } from "react";
-import { useState } from "react";
+import { useSelector } from "react-redux";
 
 const MainPage = ({ play }) => {
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const onTimeout = () => {
-    alert("Hết giờ");
-  };
   const location = useLocation();
-  const dataNavigate = location.state || {}; // Lấy data từ navigate
+  const { name, id } = location.state.room || {};
 
-  const countDownRef = useRef(null);
+  const [questionData, setQuestionData] = useState({});
+  const [endTime, setEndTime] = useState(0);
 
   const onComplete = () => {
-    console.log("Bat dau");
-    console.log("countDownRef.current: ", countDownRef.current());
-    play();
+    socket.emit("getQuestionRoom", { roomName: name, userId: user.id });
   };
 
   useEffect(() => {
-    console.log(dataNavigate);
+    socket.on("newQuestion", (data) => {
+      console.log(data);
+      setEndTime(data.endTime); // Nhận endTime từ server
+      setQuestionData(data.question);
+    });
 
-    socket.on("newTurn", (data) => {
-      console.log("newTurn: ", data);
-    });
-    // socket.on("updateTimer", (data) => {
-    //   setTime(data.timeLeft);
-    //   console.log("updateTimer", data);
-    // });
-    socket.on("updateRoom", (data) => {
-      console.log("updateRoom", data);
-    });
+    socket.emit("reJoinRoom", { idRoom: id });
+
     return () => {
-      socket.off("newTurn");
-      socket.off("updateTimer");
-      socket.off("updateRoom");
+      socket.off("newQuestion");
     };
   }, []);
 
@@ -60,9 +50,7 @@ const MainPage = ({ play }) => {
           </button>
           <ModalRanking />
           <CircleCountDown
-            start={countDownRef}
-            onTimeout={onTimeout}
-            duration={10}
+            endTime={endTime}
             classNameCustom="relative top-[-53px]"
           />
           <button
@@ -74,14 +62,21 @@ const MainPage = ({ play }) => {
         </div>
         <div className="flex justify-center items-center mb-4">
           <div className="text-[20px]">
-            Chủ đề: <span className="font-bold">Truyện tranh & Anime</span>
+            Chủ đề:{" "}
+            <span className="font-bold">{questionData?.topicInfo?.name}</span>
           </div>
         </div>
 
         <div className="text-lg font-semibold mb-6 text-center">
-          How many students in your class ___ from Korea?
+          {questionData?.question}
         </div>
-        <AnswerOptions />
+        {questionData.question && (
+          <AnswerOptions
+            questions={questionData}
+            roomName={name}
+            userId={user.id}
+          />
+        )}
       </div>
     </div>
   );
